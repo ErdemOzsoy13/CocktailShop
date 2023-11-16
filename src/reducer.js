@@ -21,19 +21,25 @@ const reducer = (state, action) => {
     };
   }
   if (action.type === "SET_FILTER_TERM") {
-    let newFilterTerms = [];
+    let filterTermList = state["filterTerms"][action.payload.filterTitle];
+    let newFilterTermList = [];
     if (action.payload.check === true) {
-      newFilterTerms = [...state.filterTerms, action.payload.term];
+      newFilterTermList = [...filterTermList, action.payload.term];
     }
     if (action.payload.check === false) {
-      newFilterTerms = state.filterTerms.filter(
+      newFilterTermList = filterTermList.filter(
         (item) => item !== action.payload.term
       );
     }
-    return { ...state, filterTerms: newFilterTerms };
+    return {
+      ...state,
+      filterTerms: {
+        ...state.filterTerms,
+        [action.payload.filterTitle]: newFilterTermList,
+      },
+    };
   }
   if (action.type === "SET_FILTERED_LIST") {
-    console.log(action.payload);
     return {
       ...state,
       filteredList: action.payload,
@@ -90,7 +96,6 @@ const reducer = (state, action) => {
   if (action.type === "CLEAR_CART") {
     return { ...state, cart: [] };
   }
-  return console.log("ERROR!!!  " + action.type);
 };
 
 export default reducer;

@@ -6,7 +6,7 @@ import { useGlobalContext } from "../context";
 const url = "https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=";
 
 export default function SingleCocktail() {
-  const { closeSubmenu } = useGlobalContext();
+  const { closeSubmenu, handleChange } = useGlobalContext();
   const [loading, setLoading] = useState(true);
   const [cocktail, setCocktail] = useState([]);
   const { id } = useParams();
@@ -106,7 +106,12 @@ export default function SingleCocktail() {
               return item ? <span key={index}>{item}</span> : null;
             })}
           </p>
-          <button className="btn add-to-cart">add to cart</button>
+          <button
+            className="btn add-to-cart"
+            onClick={() => handleChange(id, "add", cocktail)}
+          >
+            add to cart
+          </button>
         </div>
       </div>
     </section>

@@ -9,15 +9,6 @@ export default function Filter() {
   const [cocktailList, setCocktailList] = useState([]);
   const [cocktailProperties, setCocktailProperties] = useState([]);
 
-  // if (localStorage.cocktail_list) {
-  //   const cocktail_list = JSON.parse(localStorage.getItem("cocktail_list"));
-  //   setCocktailProperties(["info", "category", "glass"]);
-  //   console.log("localstorage");
-  //   setCocktailList(cocktail_list);
-  //   setLoading(false);
-  //   filterList("reset_filter");
-  // }
-
   const fetchData = useCallback(async () => {
     try {
       const resp = await fetch(url);
@@ -51,7 +42,6 @@ export default function Filter() {
     } catch (error) {
       console.log(error);
     }
-    console.log("filter.js fetch and reset");
     filterList("reset_filter");
   }, []);
 
@@ -66,7 +56,6 @@ export default function Filter() {
     } else {
       const cocktail_list = JSON.parse(localStorage.getItem("cocktail_list"));
       setCocktailProperties(["info", "category", "glass"]);
-      console.log("localstorage");
       setCocktailList(cocktail_list);
       setLoading(false);
       filterList("reset_filter");
@@ -80,30 +69,20 @@ export default function Filter() {
         <div className="filter-center">
           <h3 className="section-title">Filter</h3>
           <form className="filter-form">
-            <article>
-              <ul>
-                <h4 className="filter-title">alcohol state</h4>
-                <li className="loading"></li>
-                <li className="loading"></li>
-                <li className="loading"></li>
-              </ul>
-            </article>
-            <article>
-              <ul>
-                <h4 className="filter-title">category</h4>
-                <li className="loading"></li>
-                <li className="loading"></li>
-                <li className="loading"></li>
-              </ul>
-            </article>
-            <article>
-              <ul>
-                <h4 className="filter-title">glass</h4>
-                <li className="loading"></li>
-                <li className="loading"></li>
-                <li className="loading"></li>
-              </ul>
-            </article>
+            {cocktailProperties.map((properties, index) => {
+              return (
+                <article key={index}>
+                  <ul>
+                    <h4 className="filter-title">
+                      {properties === "info" ? "Alcohol State" : properties}
+                    </h4>
+                    <li className="loading"></li>
+                    <li className="loading"></li>
+                    <li className="loading"></li>
+                  </ul>
+                </article>
+              );
+            })}
           </form>
         </div>
       </section>
@@ -119,6 +98,7 @@ export default function Filter() {
               <article key={index}>
                 <ul>
                   <h4 className="filter-title">
+                    {/* properties dizisindeki değerleri başlığa aynen yazarken info değerini Alcohol State olarak aldım */}
                     {properties === "info" ? "Alcohol State" : properties}
                   </h4>
                   {[

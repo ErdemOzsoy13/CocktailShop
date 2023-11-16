@@ -15,7 +15,6 @@ export default function SearchForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
   };
-  console.count("hoooiiiii");
   const changeSearchTerm = (e) => {
     setSearchTerm(e.target.value);
   };

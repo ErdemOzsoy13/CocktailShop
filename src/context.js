@@ -8,10 +8,6 @@ import React, {
 import reducer from "./reducer";
 import submenuData from "./data";
 
-// SearchForm.js den gelen elementin section search
-// classına sahip tagde onmouseoverda bulunan closeSubMenu fonksiyonu section
-// search classı altında mouse her html tagı değiştirdiğinde çalışıyor!!!!!
-
 const url = "https://www.thecocktaildb.com/api/json/v1/1/search.php?s=";
 const AppContext = React.createContext();
 
@@ -22,7 +18,7 @@ const initialState = {
   isSubmenuOpen: false,
   submenuInfo: { page: { page: "", links: [] }, location: {} },
   column: 2,
-  filterTerms: [],
+  filterTerms: { info: [], category: [], glass: [] },
   cart: [],
   cartAmount: 0,
   mainList: [],
@@ -37,7 +33,6 @@ if (localStorage.cocktail_list) {
 function AppProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { searchTerm, filterTerms, cart, mainList } = state;
-  // const [mainList, setMainList] = useState([]);
   const [filteredList, setFilteredList] = useState([]);
 
   const getLocalStorage = useCallback(() => {
@@ -76,7 +71,6 @@ function AppProvider({ children }) {
             category,
           };
         });
-        console.log(newDrinks);
         localStorage.setItem("cocktail_list", JSON.stringify(newDrinks));
         dispatch({ type: "SET_COCKTAIL_LIST", payload: newDrinks });
         setMainList(newDrinks);
@@ -107,7 +101,10 @@ function AppProvider({ children }) {
   };
 
   const setFilterTerms = (filterTitle, term, check) => {
-    dispatch({ type: "SET_FILTER_TERM", payload: { term, check } });
+    dispatch({
+      type: "SET_FILTER_TERM",
+      payload: { filterTitle, term, check },
+    });
     filterList(filterTitle, term, check);
   };
 
@@ -115,58 +112,77 @@ function AppProvider({ children }) {
     // işaretli bütün checkbox özelliklerinden en az birine sahip bütün
     // ürünler arasından sadece search barda yazılı olan stringe sahip
     // olan ürünleri getirir.
-    let newCocktailList = [...mainList];
     let cocktailList = [...mainList];
+    let newCocktailList = [];
     if (filterTitle === "reset_filter") {
-      console.log("hello");
-      console.log(mainList);
       return dispatch({
         type: "SET_COCKTAIL_LIST",
         payload: mainList,
       });
     }
-    console.log(filterTerms);
-    if (term && check) {
-      if (filterTerms.length !== 0) {
-        const list = mainList.filter((item) => item[filterTitle] === term);
-        console.log(filterTerms);
-        cocktailList = [...new Set([...list, ...filteredList])];
-        setFilteredList([...new Set([...list, ...filteredList])]);
-      } else {
-        cocktailList = mainList.filter((item) => item[filterTitle] === term);
-        setFilteredList(cocktailList);
-      }
-      console.log(cocktailList);
-    } else if (term && !check && filterTerms.length > 1) {
-      cocktailList = filteredList.filter((item) => item[filterTitle] !== term);
-      setFilteredList(cocktailList);
-    } else if (!term && filterTerms.length > 0) {
-      cocktailList = [...filteredList];
-      console.log(cocktailList);
-    }
+
     if (searchTerm) {
-      newCocktailList = cocktailList.filter((item) => {
+      cocktailList = mainList.filter((item) => {
         const { name } = item;
         for (let i = 0; i < name.length; i++) {
           if (
             name.substring(i, i + searchTerm.length).toLowerCase() ===
             searchTerm.toLowerCase()
           ) {
-            console.log(searchTerm);
             return item;
           }
         }
       });
-      console.log(newCocktailList);
+    }
+    let isFilterExist = false;
+    let newFilterTerms = { ...filterTerms };
+    if (term) {
+      if (check) {
+        isFilterExist = true;
+        newFilterTerms = {
+          ...filterTerms,
+          [filterTitle]: [...filterTerms[filterTitle], term],
+        };
+      } else {
+        let abc = filterTerms[filterTitle].filter((item) => {
+          if (item !== term) {
+            return item;
+          }
+        });
+        newFilterTerms = { ...filterTerms, [filterTitle]: abc };
+        for (const prop in newFilterTerms) {
+          if (newFilterTerms[prop].length !== 0) {
+            isFilterExist = true;
+          }
+        }
+      }
+    } else {
+      for (const prop in filterTerms) {
+        if (filterTerms[prop].length !== 0) {
+          isFilterExist = true;
+        }
+      }
+    }
+    let cocktailListPart = [];
+    if (isFilterExist) {
+      for (let prop in newFilterTerms) {
+        if (newFilterTerms[prop].length !== 0) {
+          cocktailListPart = cocktailList.filter((item) => {
+            for (let i = 0; i < newFilterTerms[prop].length; i++) {
+              if (item[prop] === newFilterTerms[prop][i]) {
+                return item;
+              }
+            }
+          });
+          newCocktailList = [
+            ...new Set([...newCocktailList, ...cocktailListPart]),
+          ];
+        }
+      }
     } else {
       newCocktailList = [...cocktailList];
     }
-    if (!term && !searchTerm) {
-      newCocktailList = [...cocktailList];
-    }
-
-    console.log(filteredList);
-    console.log(newCocktailList);
+    setFilteredList(newCocktailList);
     dispatch({ type: "SET_COCKTAIL_LIST", payload: newCocktailList });
   };
 
@@ -199,8 +215,6 @@ function AppProvider({ children }) {
       fetchData();
     } else {
       dispatch({ type: "END_LOADING" });
-
-      // getLocalStorage();
     }
     setFilteredList([]);
   }, [fetchData, getLocalStorage]);
