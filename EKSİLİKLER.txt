@@ -1,5 +1,0 @@
-
-- coctail details sayfasında add to cart butonu çalışmıyor
-
-- Arama kutusuna yazılan yazını liste elemanı adının herhangi bir noktasında var olan
-elemanların hepsini getiriyor ?
